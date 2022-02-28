@@ -165,9 +165,26 @@ public class MainActivity extends AppCompatActivity {
         DocumentFile documentFile = DocumentFile.fromTreeUri(this, uri);
         assert documentFile != null;
         DocumentFile documentFile1 = documentFile.findFile("EnjoyCJZC.ini");
-        if (documentFile1 != null) {
-            documentFile1.delete();
+        if (documentFile1 == null) {
+            Toast.makeText(this, "出现了理论不可达的bug，位置在169", Toast.LENGTH_SHORT).show();
+            return;
         }
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(documentFile1.getUri());
+            try {
+                String fileText = new Scanner(inputStream).useDelimiter("\\Z").next();
+                if (fileText.equals(code)) {
+                    Toast.makeText(this, "重启游戏再来使用该功能", Toast.LENGTH_SHORT).show();
+                    inputStream.close();
+                    return;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        documentFile1.delete();
         DocumentFile file = documentFile.createFile("none", "EnjoyCJZC.ini");
         try {
             assert file != null;
